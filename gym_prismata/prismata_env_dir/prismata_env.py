@@ -6,41 +6,29 @@ import prismataengine
 class PrismataEnv(gym.Env):
 
     def __init__(self):
-        self.gamestate = prismataengine.GameState()
-        self.actions = prismataengine.Actions()
-        self.randomcards = 0
-        self.move = prismataengine.Move() 
+        self.reset()
         if __debug__:
             print('Environment initialized')
         
     def step(self, act_label): #Eats an integer labelling which of the actions to take
-        action=self.take_action(act_label)
-        if action.type() == prismataengine.ActionType.END_PHASE:
-            self.move.clear()
-            self.move.append(action)
-            self.gamestate.doMove(self.move)
-            if __debug__:
-                print(f"Move Complete! Current State: {self.gamestate}")
-        else:
-            self.gamestate.doAction(action)
-        self.actions.clear()
-        self.gamestate.generateLegalActions(self.actions)
+        action = self.gamestate.do_action(act_label)
         if __debug__:
             print('Step successful!')
-        return self.gamestate, self.actions
-    
-    def take_action(self, act_label): #Right now just checks legality, but can be extended
-        action = self.actions[act_label]
-        if not self.gamestate.isLegal(action):
-            if __debug__:
-                print(f"Action is illegal! Exiting")
-            sys.exit(1)
-        return action
+        return self.toVector(), self.gamestate.getAbstractActions()
     
     def reset(self):
-        self.gamestate = prismataengine.GameState()
-        self.gamestate.setStartingState(prismataengine.Players.Player_One, self.randomcards)
-        self.gamestate.generateLegalActions(self.actions)
+        self.gamestate = prismataengine.GameState('''{
+             "whiteMana":"0HH",
+             "blackMana":"0",
+             "phase":"action",
+             "table":
+             [
+                 {"cardName":"Drone", "color":0, "amount":6},
+                 {"cardName":"Engineer", "color":0, "amount":2},
+                 {"cardName":"Drone", "color":1, "amount":7},
+                 {"cardName":"Engineer", "color":1, "amount":2}
+             ],
+             "cards":["Drone","Engineer","Blastforge","Steelsplitter"]
+         }''')
         if __debug__:
             print(f"Starting: {self.gamestate}")
-        return self.gamestate, self.actions

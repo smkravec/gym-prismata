@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
         long_description = fh.read()
 
 setup(name='gym_prismata',
-    version='0.1',
+    version='0.2',
     install_requires=['gym','prismataengine'],
        description = 'OpenAI Gym environment for Dave Churchill\'s turn-based strategy game Prismata',
        author="Shauna Kravec",
