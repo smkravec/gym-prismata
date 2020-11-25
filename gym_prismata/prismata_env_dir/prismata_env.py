@@ -1,5 +1,8 @@
 import sys
 import gym
+from os import environ
+# Only works with POSIX-style paths
+environ["PRISMATA_INIT_AI_JSON_PATH"] = f"{'/'.join(__file__.split('/')[:-1])}/AI_config.txt"
 import prismataengine
 import random
 import numpy as np
@@ -16,13 +19,10 @@ class PythonRandomPlayer(object):
         action = random.choice(actions)
         return action
 
-"""Currently only works for SteelSplitterOnly set"""
+"""Currently only works for SteelSplitterOnly set and BaseSet"""
 class PrismataEnv(gym.Env):
 
     def __init__(self):
-        self.reward_hyper=np.array([0, 0, 1, 0, 1, 2, 3, 3, 3, 2, 1, 2, 4, 5, 5, 6, 0, 0, -1, -2, -3, -3, -3, -2, -1, -2, -4, -5, -5, -6])
-        self.observation_space = np.ndarray(30)
-        self.action_space_dim = 14
         if __debug__:
             print('Environment initialized')
             # print(f"Starting: {self.gamestate}")
@@ -54,27 +54,56 @@ class PrismataEnv(gym.Env):
             self.gamestate.step()
         return self.gamestate.toVector(), self.gamestate.getAbstractActionsVector(), self.gamestate.isGameOver()
     
-    def reset(self, policy = 'Random'):
+    def reset(self, policy = 'Random', cards='4'):
         self.policy = policy
+        self.cards = cards
+        
         if policy == 'Random':
             self.player2 = PythonRandomPlayer()
         elif type(policy) == object and hasattr(policy, 'getAction'):
             self.player2 = self.policy
         else:
-            raise Error('Unknown policy provided')
-        self.gamestate = prismataengine.GameState('''{
-             "whiteMana":"0HH",
-             "blackMana":"0HH",
-             "phase":"action",
-             "table":
-             [
-                 {"cardName":"Drone", "color":0, "amount":6},
-                 {"cardName":"Engineer", "color":0, "amount":2},
-                 {"cardName":"Drone", "color":1, "amount":7},
-                 {"cardName":"Engineer", "color":1, "amount":2}
-             ],
-             "cards":["Drone","Engineer","Blastforge","Steelsplitter"]
-         }''', player2=self.player2)
+            self.player2 = self.policy
+        if cards == '4':
+            self.gamestate = prismataengine.GameState('''{
+                 "whiteMana":"0HH",
+                 "blackMana":"0HH",
+                 "phase":"action",
+                 "table":
+                 [
+                     {"cardName":"Drone", "color":0, "amount":6},
+                     {"cardName":"Engineer", "color":0, "amount":2},
+                     {"cardName":"Drone", "color":1, "amount":7},
+                     {"cardName":"Engineer", "color":1, "amount":2}
+                 ],
+                 "cards":["Drone","Engineer","Blastforge","Steelsplitter"]
+             }''',cards=4, player2=self.player2)
+            self.reward_hyper=np.array([0, 0,
+                                     1,  0,  1,  2,
+                                     3,  3,  3,  2,  1,  2,  4,  5,  5,  6,
+                                    -1,  0, -1, -2,
+                                    -3, -3, -3, -2, -1, -2, -4, -5, -5, -6])
+            self.observation_space = np.ndarray(30)
+            self.action_space_dim = 14
+        elif cards =='11':
+            self.gamestate = prismataengine.GameState('''{
+                 "whiteMana":"0HH",
+                 "blackMana":"0HH",
+                 "phase":"action",
+                 "table":
+                 [
+                     {"cardName":"Drone", "color":0, "amount":6},
+                     {"cardName":"Engineer", "color":0, "amount":2},
+                     {"cardName":"Drone", "color":1, "amount":7},
+                     {"cardName":"Engineer", "color":1, "amount":2}
+                 ],
+                 "cards":["Drone","Engineer","Blastforge","Animus", "Conduit", "Steelsplitter", "Wall", "Rhino", "Tarsier", "Forcefield", "Gauss Cannon"]
+             }''',cards=11, player2=self.player2)
+            self.reward_hyper=np.zeros(82) #fix later
+            self.observation_space = np.ndarray(82)
+            self.action_space_dim = 32
+        else:
+            raise Error('Unknown Card Set')
         if __debug__:
             print(f"Starting: {self.gamestate}")
         return self.gamestate.toVector(), self.gamestate.getAbstractActionsVector()
