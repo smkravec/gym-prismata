@@ -35,15 +35,17 @@ class PrismataEnv(gym.Env):
         obs, legal, done = self.gamestate.toVector(), self.gamestate.getAbstractActionsVector(), self.gamestate.isGameOver()
         obs, legal, done = self.playOpponent(obs, legal, done)
         reward = self.getReward(obs, done)
-        return obs, legal, reward, done
+        winner=self.gamestate.winner()
+        return obs, legal, reward, done, winner
     
     def getReward(self, obs, done): 
         if __debug__:
             print('Calculating reward...')
-        reward = (.001)*np.dot(self.reward_hyper, obs)
-        if done and self.gamestate.winner() == prismataengine.Players.One:
+        reward = (.001)*np.dot(self.reward_hyper, obs)#Coefficient is an adjustable hyper
+        winner=self.gamestate.winner()
+        if done and winner == prismataengine.Players.One:
             reward+=1000 #another arbitrary hyper
-        elif done and self.gamestate.winner() == prismataengine.Players.Two:
+        elif done and winner == prismataengine.Players.Two:
             reward-=1000 
         if __debug__:
             print(f'Reward calc successful ({reward})!')
@@ -78,11 +80,12 @@ class PrismataEnv(gym.Env):
                  ],
                  "cards":["Drone","Engineer","Blastforge","Steelsplitter"]
              }''',cards=4, player2=self.player2)
-            self.reward_hyper=np.array([0, 0,
-                                     1,  0,  1,  2,
-                                     3,  3,  3,  2,  1,  2,  4,  5,  5,  6,
-                                    -1,  0, -1, -2,
-                                    -3, -3, -3, -2, -1, -2, -4, -5, -5, -6])
+            #self.reward_hyper=np.array([0, 0,
+            #                         1,  0,  1,  2,
+            #                         3,  3,  3,  2,  1,  2,  4,  5,  5,  6,
+            #                        -1,  0, -1, -2,
+            #                        -3, -3, -3, -2, -1, -2, -4, -5, -5, -6])
+            self.reward_hyper=np.zeros(30) #Add more hypers if you want, this is sparse
             self.observation_space = np.ndarray(30)
             self.action_space_dim = 14
         elif cards =='11':
@@ -99,7 +102,7 @@ class PrismataEnv(gym.Env):
                  ],
                  "cards":["Drone","Engineer","Blastforge","Animus", "Conduit", "Steelsplitter", "Wall", "Rhino", "Tarsier", "Forcefield", "Gauss Cannon"]
              }''',cards=11, player2=self.player2)
-            self.reward_hyper=np.zeros(82) #fix later
+            self.reward_hyper=np.zeros(82) #Same as above
             self.observation_space = np.ndarray(82)
             self.action_space_dim = 32
         else:
