@@ -41,12 +41,12 @@ class PrismataEnv(gym.Env):
     def getReward(self, obs, done): 
         if __debug__:
             print('Calculating reward...')
-        reward = (.001)*np.dot(self.reward_hyper, obs)#Coefficient is an adjustable hyper
+        reward = np.dot(self.reward_hyper, obs)#Coefficient is an adjustable hyper
         winner=self.gamestate.winner()
         if done and winner == prismataengine.Players.One:
-            reward+=1000 #another arbitrary hyper
+            reward+=1 #another arbitrary hyper
         elif done and winner == prismataengine.Players.Two:
-            reward-=1000 
+            reward-=1 
         if __debug__:
             print(f'Reward calc successful ({reward})!')
         return reward
