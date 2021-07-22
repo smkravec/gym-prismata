@@ -2,7 +2,7 @@ import sys
 import gym
 from os import environ
 # Only works with POSIX-style paths
-environ["PRISMATA_INIT_AI_JSON_PATH"] = f"{'/'.join(__file__.split('/')[:-1])}/AI_config.txt"
+#environ["PRISMATA_INIT_AI_JSON_PATH"] = f"{'/'.join(__file__.split('/')[:-1])}/AI_config.txt"
 import prismataengine
 import random
 import numpy as np
@@ -24,7 +24,12 @@ class PrismataEnv(gym.Env):
             # print(f"Starting: {self.gamestate}")
         
     def step(self, action_label):
-        self.gamestate.doAction(int(action_label))
+        print("G1", self.gamestate)
+        try:
+            self.gamestate.doAction(int(action_label))
+        except e:
+            print(e)
+        print("G2", self.gamestate)
         #action = self.gamestate.getAction(int(action_label))
         #if __debug__:
         #    print(f'Action: {action_label} ({action})')
