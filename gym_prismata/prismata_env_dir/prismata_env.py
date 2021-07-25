@@ -22,14 +22,14 @@ class PrismataEnv(gym.Env):
         if __debug__:
             print('Environment initialized')
             # print(f"Starting: {self.gamestate}")
-        
+
     def step(self, action_label):
-        print("G1", self.gamestate)
+        #print("G1", self.gamestate)
         try:
             self.gamestate.doAction(int(action_label))
         except e:
             print(e)
-        print("G2", self.gamestate)
+        #print("G2", self.gamestate)
         #action = self.gamestate.getAction(int(action_label))
         #if __debug__:
         #    print(f'Action: {action_label} ({action})')
@@ -40,8 +40,8 @@ class PrismataEnv(gym.Env):
         reward = self.getReward(obs, done)
         winner=self.gamestate.winner()
         return obs, legal, reward, done, winner
-    
-    def getReward(self, obs, done): 
+
+    def getReward(self, obs, done):
         reward=0
         #Coefficients are an adjustable hyper
         #reward = np.dot(self.reward_hyper, obs)
@@ -51,19 +51,19 @@ class PrismataEnv(gym.Env):
         elif done and winner == self.opponent_player:
             reward-=1
         return reward
-    
+
     def playOpponent(self, obs, legal, done):
         if self.gamestate.activePlayer == self.opponent_player:
             self.gamestate.step()
         return self.gamestate.toVector(), self.gamestate.getAbstractActionsVector(), self.gamestate.isGameOver()
-    
+
     def reset(self, policy = 'Random', cards='4', NN_player='p1', one_hot=False):
         self.policy = policy
         self.cards = cards
         self.NN_player = prismataengine.Players.One if NN_player == 'p1' else prismataengine.Players.Two
         self.opponent_player = prismataengine.Players.Two if self.NN_player == prismataengine.Players.One else prismataengine.Players.One
         self.one_hot=one_hot
-        
+
         self.player1=None
         self.player2=None
         if self.NN_player == prismataengine.Players.One:
