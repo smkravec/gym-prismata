@@ -124,3 +124,4 @@ class PrismataEnv(gym.Env):
         if __debug__:
             print(f"Starting: {self.gamestate}")
         return self.gamestate.toVector(), self.gamestate.getAbstractActionsVector()
+        return self.gamestate.toVector(), self.gamestate.getAbstractActionsVector()
